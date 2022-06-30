@@ -1,0 +1,91 @@
+{
+  "name": "react-native-marketingcloud",
+  "version": "8.0.6",
+  "description": "React-Native Salesforce Marketing Cloud",
+  "module": "lib/module/index",
+  "types": "lib/typescript/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "files": [
+    "src",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "react-native-marketingcloud.podspec",
+    "!android/build",
+    "!ios/build",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__"
+  ],
+  "scripts": {
+    "prepare": "bob build",
+    "build": "tsc --noEmit",
+    "lint": "eslint -f codeframe --ext .js --ext .jsx --ext .ts --ext .tsx src",
+    "test": "jest"
+  },
+  "keywords": [
+    "react-native",
+    "ios",
+    "android"
+  ],
+  "author": "Yvo van Beek <yvo.vanbeek@nbcuni.com> (https://github.com/yvbeek)",
+  "repository": "https://github.com/yvbeek/react-native-marketingcloud",
+  "homepage": "https://github.com/yvbeek/react-native-marketingcloud#readme",
+  "license": "BSD-3-Clause",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.18.2",
+    "@react-native-community/eslint-config": "^3.0.2",
+    "@types/jest": "^28.1.2",
+    "@types/react": "~17.0.21",
+    "@types/react-native": "0.67.9",
+    "eslint": "^8.4.1",
+    "jest": "^28.1.1",
+    "pod-install": "^0.1.0",
+    "react": "17.0.2",
+    "react-native": "0.68.2",
+    "react-native-builder-bob": "^0.18.2",
+    "typescript": "^4.5.2"
+  },
+  "resolutions": {
+    "@types/react": "17.0.21"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "jest": {
+    "preset": "react-native",
+    "modulePathIgnorePatterns": [
+      "<rootDir>/lib/"
+    ]
+  },
+  "eslintConfig": {
+    "root": true,
+    "parser": "@babel/eslint-parser",
+    "extends": [
+      "@react-native-community"
+    ]
+  },
+  "eslintIgnore": [
+    "node_modules/",
+    "lib/"
+  ],
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      "module",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ]
+  }
+}
