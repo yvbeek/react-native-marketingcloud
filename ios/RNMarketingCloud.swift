@@ -3,12 +3,18 @@ import MarketingCloudSDK
 
 @objc(RNMarketingCloud)
 public class RNMarketingCloud: NSObject {
-  @objc public static var config: RNMarketingCloudConfig?
+  @objc public static private(set) var config: RNMarketingCloudConfig?
+
+  /// Configures the Salesforce Marketing Cloud SDK.
+  /// Note: make sure to call the initializeSDK function from JavaScript.
+  @objc static public func configure(_ config: RNMarketingCloudConfig) {
+    self.config = config
+  }
 
   /// Initializes the Salesforce Marketing Cloud SDK.
   @objc public func initializeSDK(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
     guard let config = Self.config, let appId = config.appId, !appId.isEmpty else {
-      return reject("E_SDK_CONFIG_INVALID", "The SDK configuration on the iOS side is invalid", nil)
+      return reject("E_SDK_CONFIG_INVALID", "The SFMC SDK configuration is invalid", nil)
     }
 
     // Create the push configuration
