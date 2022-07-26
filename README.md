@@ -23,31 +23,29 @@ config.applicationControlsBadging = false
 config.inboxEnabled = true
 config.locationEnabled = false
 
-RNMarketingCloud.config = config
+RNMarketingCloud.configure(config)
 ```
 
-### Kotlin
-```kotlin
-val config = RNMarketingCloudConfig().apply {
-    appId = "<app id>"
-    accessToken = "<access token>"
-    cloudServerURL = "<cloud server url>"
-    senderId = "<sender id>"
+### Java
+```java
+Context context = getApplicationContext();
 
-    analyticsEnabled = true
-    inboxEnabled = true
+RNMarketingCloudConfig config = new RNMarketingCloudConfig();
+config.appId = "<app id>";
+config.accessToken = "<access token>";
+config.cloudServerURL = "<cloud server url>";
+config.senderId = "<sender id>";
 
-    notificationIcon = R.drawable.ic_notification
-    notificationUrlHandler = { url ->
-        if (url == null) {
-            Intent(getApplicationContext(), MainActivity::class.java)
-        } else {
-            Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        }
-    }
-}
+config.analyticsEnabled = true;
+config.inboxEnabled = true;
+config.notificationIcon = R.drawable.ic_notification;
+config.notificationUrlHandler = url -> {
+    return url == null ?
+           new Intent(context, MainActivity.class) :
+           new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+};
 
-RNMarketingCloud.config = config
+RNMarketingCloud.setup(context, config, result -> {});
 ```
 
 ### JavaScript
