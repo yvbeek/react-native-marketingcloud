@@ -10,10 +10,13 @@ class RNMarketingCloudConfig {
   lateinit var cloudServerURL: String
   lateinit var senderId: String
 
-  @DrawableRes
+  @JvmField @DrawableRes
   var notificationIcon: Int = 0
   lateinit var notificationUrlHandler: (url: String?) -> Intent
 
+  @JvmField
   var analyticsEnabled = false
+
+  @JvmField
   var inboxEnabled = false
 }
