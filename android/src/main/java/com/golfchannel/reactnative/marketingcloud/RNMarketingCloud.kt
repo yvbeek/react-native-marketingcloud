@@ -1,7 +1,9 @@
 package com.golfchannel.reactnative.marketingcloud
 
 import android.app.PendingIntent
+import android.content.Context
 import android.os.Build
+import androidx.core.util.Consumer
 import com.facebook.react.bridge.*
 import com.salesforce.marketingcloud.MCLogListener
 import com.salesforce.marketingcloud.MarketingCloudConfig
@@ -17,8 +19,54 @@ class RNMarketingCloud(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
   companion object {
+    /**
+     * Indicates if the Salesforce Marketing Cloud SDK has been initialized.
+     */
     @JvmStatic
-    var config: RNMarketingCloudConfig? = null
+    var initialized = false
+    private set
+
+    /**
+     * Configures and initializes the Salesforce Marketing Cloud SDK.
+     */
+    @JvmStatic
+    fun setup(context: Context, sdkConfig: RNMarketingCloudConfig, completionHandler: Consumer<Boolean>) {
+      // Prepare the result function
+      val resolve = fun (result: Boolean) {
+        initialized = result
+        completionHandler.accept(result)
+      }
+
+      // Create the notification customization options
+      val customizationOptions = NotificationCustomizationOptions.create(
+        sdkConfig.notificationIcon, { innerContext, notification ->
+          val requestCode = Random().nextInt()
+          val intent = sdkConfig.notificationUrlHandler(notification.url)
+          val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
+
+          PendingIntent.getActivity(innerContext, requestCode, intent, flags)
+        }, null
+      )
+
+      // Configure the SDK
+      SFMCSdk.configure(context, SFMCSdkModuleConfig.build {
+        pushModuleConfig = MarketingCloudConfig.builder().apply {
+          setApplicationId(sdkConfig.appId)
+          setAccessToken(sdkConfig.accessToken)
+          setMarketingCloudServerUrl(sdkConfig.cloudServerURL)
+          setSenderId(sdkConfig.senderId)
+          setAnalyticsEnabled(sdkConfig.analyticsEnabled)
+          setInboxEnabled(sdkConfig.inboxEnabled)
+          setNotificationCustomizationOptions(customizationOptions)
+        }.build(context)
+      }) {
+        when (it.status) {
+          InitializationStatus.SUCCESS -> resolve(true)
+          InitializationStatus.FAILURE -> resolve(false)
+        }
+      }
+    }
   }
 
   override fun getName(): String {
@@ -27,45 +75,11 @@ class RNMarketingCloud(reactContext: ReactApplicationContext) :
 
   /**
    * Initializes the Salesforce Marketing Cloud SDK.
+   * Note: make sure to call the static setup function from onCreate.
    */
   @ReactMethod
   fun initializeSDK(promise: Promise) {
-    val sdkConfig = if (config?.appId?.isEmpty() == false) config!! else {
-      return promise.reject(
-        "E_SDK_CONFIG_INVALID",
-        "The SDK configuration on the Android side is invalid"
-      )
-    }
-
-    // Create the notification customization options
-    val customizationOptions = NotificationCustomizationOptions.create(
-      sdkConfig.notificationIcon, { context, notification ->
-        val requestCode = Random().nextInt()
-        val intent = sdkConfig.notificationUrlHandler(notification.url)
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
-
-        PendingIntent.getActivity(context, requestCode, intent, flags)
-      }, null
-    )
-
-    // Configure the SDK
-    SFMCSdk.configure(reactApplicationContext, SFMCSdkModuleConfig.build {
-      pushModuleConfig = MarketingCloudConfig.builder().apply {
-        setApplicationId(sdkConfig.appId)
-        setAccessToken(sdkConfig.accessToken)
-        setMarketingCloudServerUrl(sdkConfig.cloudServerURL)
-        setSenderId(sdkConfig.senderId)
-        setAnalyticsEnabled(sdkConfig.analyticsEnabled)
-        setInboxEnabled(sdkConfig.inboxEnabled)
-        setNotificationCustomizationOptions(customizationOptions)
-      }.build(reactApplicationContext)
-    }) {
-      when (it.status) {
-        InitializationStatus.SUCCESS -> promise.resolve(true)
-        InitializationStatus.FAILURE -> promise.resolve(false)
-      }
-    }
+    promise.resolve(initialized)
   }
 
   /**
