@@ -93,3 +93,4 @@ export declare class SFMCSDK {
     static refreshMessages(): Promise<boolean>;
 }
 export default SFMCSDK;
+//# sourceMappingURL=index.d.ts.map
