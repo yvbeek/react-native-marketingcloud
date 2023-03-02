@@ -136,7 +136,9 @@ class RNMarketingCloud(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun setProfileAttributes(attributes: ReadableMap) {
     SFMCSdk.requestSdk { sdk ->
-      val map = attributes.toHashMap().mapValues { it.toString() }
+      @Suppress("UNCHECKED_CAST")
+      val hashMap = attributes.toHashMap() as HashMap<String, String?>
+      val map = hashMap.toMap()
       sdk.identity.setProfileAttributes(map)
     }
   }
