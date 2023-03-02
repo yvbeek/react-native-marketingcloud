@@ -7,14 +7,14 @@
 }
 
 RCT_EXTERN_METHOD(initializeSDK:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(setDebugLoggingEnabled:(bool)enabled)
+RCT_EXTERN_METHOD(setDebugLoggingEnabled:(BOOL)enabled)
 
 RCT_EXTERN_METHOD(getDeviceToken:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(setProfileAttributes:(NSDictionary *)attributes)
 RCT_EXTERN_METHOD(getProfileId:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(setProfileId:(NSString *)profileId)
 RCT_EXTERN_METHOD(isPushEnabled:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-RCT_EXTERN_METHOD(setPushEnabled:(bool)enabled)
+RCT_EXTERN_METHOD(setPushEnabled:(BOOL)enabled)
 
 RCT_EXTERN_METHOD(getAllMessages:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 RCT_EXTERN_METHOD(getAllMessagesCount:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)

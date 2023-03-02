@@ -87,8 +87,9 @@ class RNMarketingCloud(reactContext: ReactApplicationContext) :
    */
   @ReactMethod
   fun setDebugLoggingEnabled(enabled: Boolean) {
-    val level = if (enabled) MCLogListener.DEBUG else MCLogListener.INFO
+    val level = if (enabled) MCLogListener.DEBUG else MCLogListener.WARN
     MarketingCloudSdk.setLogLevel(level)
+    MarketingCloudSdk.setLogListener(MCLogListener.AndroidLogListener())
   }
 
   // region Push Notifications

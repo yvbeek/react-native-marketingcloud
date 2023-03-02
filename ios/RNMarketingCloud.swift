@@ -49,7 +49,8 @@ public class RNMarketingCloud: NSObject {
 
   /// Enables or disables verbose logging within the native Marketing Cloud SDK.
   @objc public func setDebugLoggingEnabled(_ enabled: Bool) {
-    SFMCSdk.mp.setDebugLoggingEnabled(enabled)
+    let logLevel: LogLevel = enabled ? .debug : .warn
+    SFMCSdk.setLogger(logLevel: logLevel)
   }
 }
 
