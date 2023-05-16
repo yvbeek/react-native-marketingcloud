@@ -44,6 +44,10 @@ public class RNMarketingCloud: NSObject {
       }
     }.build()
 
+    // Prevent fatal errors around keychain access
+    SFMCSdk.setKeychainAccessErrorsAreFatal(errorsAreFatal: false)
+
+    // Intialize the SDK
     SFMCSdk.initializeSdk(sdkConfig)
   }
 
