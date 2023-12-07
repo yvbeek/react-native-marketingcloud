@@ -23,63 +23,69 @@ class RNMarketingCloud(reactContext: ReactApplicationContext) :
      * Indicates if the Salesforce Marketing Cloud SDK has been initialized.
      */
     @JvmStatic
-    var initialized = false
+    var config: RNMarketingCloudConfig? = null
+    var context: Context? = null
     private set
 
     /**
-     * Configures and initializes the Salesforce Marketing Cloud SDK.
+     * Configures the Salesforce Marketing Cloud SDK.
+     * Note: make sure to call the initializeSDK function from JavaScript.
      */
     @JvmStatic
-    fun setup(context: Context, sdkConfig: RNMarketingCloudConfig, completionHandler: Consumer<Boolean>) {
+    fun configure(context: Context, sdkConfig: RNMarketingCloudConfig) {
       // Prepare the result function
-      val resolve = fun (result: Boolean) {
-        initialized = result
-        completionHandler.accept(result)
-      }
+      this.config = sdkConfig
+      this.context = context
+    }
+  }
 
-      // Create the notification customization options
-      val customizationOptions = NotificationCustomizationOptions.create(
-        sdkConfig.notificationIcon, { innerContext, notification ->
-          val requestCode = Random().nextInt()
-          val intent = sdkConfig.notificationUrlHandler(notification.url)
-          val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
+  /**
+   * Initializes the Salesforce Marketing Cloud SDK.
+   * Note: make sure to call the static configure function from onCreate.
+   */
+  @ReactMethod
+  fun initializeSDK(promise: Promise) {
+    if (config == null || context == null) { 
+      promise.resolve(false)
+      return  
+    }
+    
+    val sdkConfig = config!!
+    val sdkContext = context!!
 
-          PendingIntent.getActivity(innerContext, requestCode, intent, flags)
-        }, null
-      )
+    // Create the notification customization options
+    val customizationOptions = NotificationCustomizationOptions.create(
+      sdkConfig.notificationIcon, { innerContext, notification ->
+        val requestCode = Random().nextInt()
+        val intent = sdkConfig.notificationUrlHandler(notification.url)
+        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_UPDATE_CURRENT
 
-      // Configure the SDK
-      SFMCSdk.configure(context, SFMCSdkModuleConfig.build {
-        pushModuleConfig = MarketingCloudConfig.builder().apply {
-          setApplicationId(sdkConfig.appId)
-          setAccessToken(sdkConfig.accessToken)
-          setMarketingCloudServerUrl(sdkConfig.cloudServerURL)
-          setSenderId(sdkConfig.senderId)
-          setAnalyticsEnabled(sdkConfig.analyticsEnabled)
-          setInboxEnabled(sdkConfig.inboxEnabled)
-          setNotificationCustomizationOptions(customizationOptions)
-        }.build(context)
-      }) {
-        when (it.status) {
-          InitializationStatus.SUCCESS -> resolve(true)
-          InitializationStatus.FAILURE -> resolve(false)
-        }
+        PendingIntent.getActivity(innerContext, requestCode, intent, flags)
+      }, null
+    )
+
+    // Configure the SDK
+    SFMCSdk.configure(sdkContext, SFMCSdkModuleConfig.build {
+      pushModuleConfig = MarketingCloudConfig.builder().apply {
+        setApplicationId(sdkConfig.appId)
+        setAccessToken(sdkConfig.accessToken)
+        setMarketingCloudServerUrl(sdkConfig.cloudServerURL)
+        setSenderId(sdkConfig.senderId)
+        setAnalyticsEnabled(sdkConfig.analyticsEnabled)
+        setInboxEnabled(sdkConfig.inboxEnabled)
+        setNotificationCustomizationOptions(customizationOptions)
+      }.build(sdkContext)
+    }) {
+      when (it.status) {
+        InitializationStatus.SUCCESS -> promise.resolve(true)
+        InitializationStatus.FAILURE -> promise.resolve(false)
       }
     }
   }
 
   override fun getName(): String {
     return "RNMarketingCloud"
-  }
-
-  /**
-   * Initializes the Salesforce Marketing Cloud SDK.
-   * Note: make sure to call the static setup function from onCreate.
-   */
-  @ReactMethod
-  fun initializeSDK(promise: Promise) {
-    promise.resolve(initialized)
   }
 
   /**
