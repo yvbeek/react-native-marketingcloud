@@ -1,5 +1,6 @@
 import Foundation
 import MarketingCloudSDK
+import SFMCSDK
 
 @objc(RNMarketingCloud)
 public class RNMarketingCloud: NSObject {
@@ -28,26 +29,24 @@ public class RNMarketingCloud: NSObject {
       .setInboxEnabled(config.inboxEnabled)
       .build()
 
-    // Create the SDK configuration
-    let sdkConfig = ConfigBuilder().setPush(config: pushConfig) { [weak self] result in
-      guard result == .success else {
-        return resolve(false)
-      }
+    // Set up the SDK's completion handler
+    let completionHandler: (OperationResult) -> () = { result in
+        guard result == .success else {
+          return resolve(false)
+        }
 
-      // Tell the SDK how to handle incoming urls
-      SFMCSdk.mp.setURLHandlingDelegate(RNMarketingCloudDelegate.shared)
+        // Tell the SDK how to handle incoming urls
+        SFMCSdk.mp.setURLHandlingDelegate(RNMarketingCloudDelegate.shared)
 
-      // Ask Apple to initialize push notifications so that we get a device token
-      DispatchQueue.main.async {
-        UIApplication.shared.registerForRemoteNotifications();
-        resolve(true)
-      }
-    }.build()
-
-    // Prevent fatal errors around keychain access
-    SFMCSdk.setKeychainAccessErrorsAreFatal(errorsAreFatal: false)
+        // Ask Apple to initialize push notifications so that we get a device token
+        DispatchQueue.main.async {
+          UIApplication.shared.registerForRemoteNotifications();
+          resolve(true)
+        }
+    }
 
     // Intialize the SDK
+    let sdkConfig = ConfigBuilder().setPush(config: pushConfig, onCompletion: completionHandler).build()
     SFMCSdk.initializeSdk(sdkConfig)
   }
 
